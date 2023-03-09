@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="1200pt" height="1200pt" version="1.1" viewBox="0 0 1200 1200" xmlns="http://www.w3.org/2000/svg">
+ <g>
+  <path d="m925 150h-25v900h25c30 0 50-20 50-50v-800c0-30-20-50-50-50z"/>
+  <path d="m275 150c-30 0-50 20-50 50v75h75v50h-75v100h75v50h-75v100h75v50h-75v100h75v50h-75v100h75v50h-75v75c0 30 20 50 50 50h575v-900zm475 700h-300v-50h300zm0-100h-300v-50h300zm0-175h-300v-200h300z"/>
+ </g>
+</svg>

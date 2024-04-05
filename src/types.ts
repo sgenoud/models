@@ -2,6 +2,7 @@ export type SocialObjects = {
   name: SocialMedia;
   href: string;
   active: boolean;
+  isMe?: boolean;
   linkTitle: string;
 }[];
 

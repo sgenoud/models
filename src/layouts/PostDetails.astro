@@ -4,7 +4,8 @@ import Header from "@components/Header.astro";
 import Footer from "@components/Footer.astro";
 import Tag from "@components/Tag.astro";
 import Datetime from "@components/Datetime";
-import type { CollectionEntry } from "astro:content";
+import Model from "@components/Model";
+import { CollectionEntry } from "astro:content";
 
 export interface Props {
   post: CollectionEntry<"blog">;
@@ -12,21 +13,20 @@ export interface Props {
 
 const { post } = Astro.props;
 
-const { title, author, description, ogImage, pubDatetime, tags, model } = post.data;
+const { title, author, description, ogImage, pubDatetime, tags, model } =
+  post.data;
 
 const { Content } = await post.render();
 
 const ogUrl = new URL(ogImage ? ogImage : `${title}.png`, Astro.url.origin)
   .href;
-
-  const modelUrl = "https://studio.replicad.xyz/share/" + encodeURIComponent(`${Astro.url.origin}/models/${model}.js`);
 ---
 
 <Layout title={title} author={author} description={description} ogImage={ogUrl}>
   <Header />
   <div class="mx-auto flex w-full max-w-3xl justify-start px-2">
     <button
-      class="focus-outline mt-8 mb-2 flex hover:opacity-75"
+      class="focus-outline mb-2 mt-8 flex hover:opacity-75"
       onclick="history.back()"
     >
       <svg xmlns="http://www.w3.org/2000/svg"
@@ -38,12 +38,11 @@ const ogUrl = new URL(ogImage ? ogImage : `${title}.png`, Astro.url.origin)
   </div>
   <main id="main-content">
     <h1 class="post-title">{title}</h1>
-    <Datetime datetime={pubDatetime} size="lg" className="my-2" />
+    <Datetime pubDatetime={pubDatetime} size="lg" className="my-2" />
     <article id="article" role="article" class="prose mx-auto mt-8 max-w-3xl">
       <Content />
-      {model  && <iframe src={modelUrl} width="100%" height="600px" fullscreen; vr" allowfullscreen="true" webkitallowfullscreen="true" mozallowfullscreen="true" frameborder="0" scrolling="no" allowvr="yes" allowfullscreenmoz="true" ></iframe>}
+      {model && <Model origin={Astro.url.origin} model={model} />}
     </article>
-
   </main>
   <Footer />
 </Layout>

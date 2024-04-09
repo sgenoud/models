@@ -1,0 +1,59 @@
+---
+import type { CollectionEntry } from "astro:content";
+import { slugifyStr } from "@utils/slugify";
+import Datetime from "./Datetime";
+
+import type { ImageMetadata } from "astro";
+import { Image } from "astro:assets";
+
+export interface Props {
+  href?: string;
+  frontmatter: CollectionEntry<"blog">["data"];
+  secHeading?: boolean;
+}
+
+const images = import.meta.glob<{ default: ImageMetadata }>(
+  "/src/assets/models/*.svg"
+);
+
+const { href, frontmatter, secHeading = true } = Astro.props;
+const { title, pubDatetime, modDatetime, description, model } = frontmatter;
+
+const image = images[`/src/assets/models/${model}.svg`];
+console.log(images, image);
+
+const headerProps = {
+  style: { viewTransitionName: slugifyStr(title) },
+  className: "text-lg font-medium decoration-dashed hover:underline",
+};
+---
+
+<li
+  class="rounded-lg border border-gray-200 shadow dark:border-gray-700 dark:bg-gray-800"
+>
+  <a href={href}>
+    {
+      image && (
+        <Image
+          src={image()}
+          class="object-fit h-64 w-full rounded-t p-4 hover:bg-gray-100"
+          alt=""
+        />
+      )
+    }
+  </a>
+  <div class="p-4">
+    <a href={href}>
+      {
+        secHeading ? (
+          <h2 {...headerProps}>{title}</h2>
+        ) : (
+          <h3 {...headerProps}>{title}</h3>
+        )
+      }
+    </a>
+
+    <Datetime pubDatetime={pubDatetime} modDatetime={modDatetime} />
+    <p>{description}</p>
+  </div>
+</li>

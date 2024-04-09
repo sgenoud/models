@@ -1,4 +1,5 @@
 import satori, { type SatoriOptions } from "satori";
+import fs from "node:fs";
 import { Resvg } from "@resvg/resvg-js";
 import { type CollectionEntry } from "astro:content";
 import postOgImage from "./og-templates/post";
@@ -49,7 +50,15 @@ function svgBufferToPngBuffer(svg: string) {
 }
 
 export async function generateOgImageForPost(post: CollectionEntry<"blog">) {
-  const svg = await satori(postOgImage(post), options);
+  console.log(post);
+  const postImage = fs.readFileSync(
+    `./src/assets/models/${post.data.model}.svg`,
+    "utf8"
+  );
+  const svg = await satori(
+    postOgImage(post, "data:image/svg+xml," + encodeURIComponent(postImage)),
+    options
+  );
   return svgBufferToPngBuffer(svg);
 }
 

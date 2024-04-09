@@ -1,7 +1,7 @@
 import { SITE } from "@config";
 import type { CollectionEntry } from "astro:content";
 
-export default (post: CollectionEntry<"blog">) => {
+export default (post: CollectionEntry<"blog">, image) => {
   return (
     <div
       style={{
@@ -33,6 +33,7 @@ export default (post: CollectionEntry<"blog">) => {
       <div
         style={{
           border: "4px solid #000",
+          position: "relative",
           background: "#fefbfb",
           borderRadius: "4px",
           display: "flex",
@@ -45,18 +46,17 @@ export default (post: CollectionEntry<"blog">) => {
         <div
           style={{
             display: "flex",
+            flex: "1 1 40%",
             flexDirection: "column",
-            justifyContent: "space-between",
-            margin: "20px",
-            width: "90%",
+            padding: "24px",
             height: "90%",
+            overflowX: "visible",
           }}
         >
           <p
             style={{
-              fontSize: 72,
+              fontSize: 64,
               fontWeight: "bold",
-              maxHeight: "84%",
               overflow: "hidden",
             }}
           >
@@ -66,7 +66,6 @@ export default (post: CollectionEntry<"blog">) => {
             style={{
               display: "flex",
               justifyContent: "space-between",
-              width: "100%",
               marginBottom: "8px",
               fontSize: 28,
             }}
@@ -84,11 +83,23 @@ export default (post: CollectionEntry<"blog">) => {
                 {post.data.author}
               </span>
             </span>
-
-            <span style={{ overflow: "hidden", fontWeight: "bold" }}>
-              {SITE.title}
-            </span>
           </div>
+        </div>
+        <div
+          style={{
+            display: "flex",
+            flex: "1 1 50%",
+            padding: "24px",
+          }}
+        >
+          <img
+            src={image}
+            width="100%"
+            height="100%"
+            style={{
+              objectFit: "contain",
+            }}
+          />
         </div>
       </div>
     </div>

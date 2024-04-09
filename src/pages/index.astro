@@ -4,7 +4,7 @@ import Layout from "@layouts/Layout.astro";
 import Header from "@components/Header.astro";
 import Footer from "@components/Footer.astro";
 import LinkButton from "@components/LinkButton.astro";
-import Card from "@components/Card";
+import Card from "@components/Card.astro";
 import getSortedPosts from "@utils/getSortedPosts";
 
 const posts = await getCollection("blog");
@@ -16,7 +16,9 @@ const sortedPosts = getSortedPosts(posts);
   <Header />
   <main id="main-content">
     <section id="recent-posts">
-      <ul>
+      <ul
+        class="md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 grid grid-flow-row gap-8 text-neutral-600 sm:grid-cols-2"
+      >
         {
           sortedPosts.map(
             ({ slug, data }, index) =>

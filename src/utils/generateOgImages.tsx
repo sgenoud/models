@@ -50,7 +50,6 @@ function svgBufferToPngBuffer(svg: string) {
 }
 
 export async function generateOgImageForPost(post: CollectionEntry<"blog">) {
-  console.log(post);
   const postImage = fs.readFileSync(
     `./src/assets/models/${post.data.model}.svg`,
     "utf8"

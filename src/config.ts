@@ -6,7 +6,7 @@ export const SITE = {
   desc: "My 3D models",
   title: "My 3D models",
   ogImage: "astropaper-og.jpg",
-  lightAndDarkMode: true,
+  lightAndDarkMode: false,
   postPerPage: 6,
   scheduledPostMargin: 15 * 60 * 1000, // 15 minutes
 };

@@ -20,7 +20,6 @@ const { href, frontmatter, secHeading = true } = Astro.props;
 const { title, pubDatetime, modDatetime, description, model } = frontmatter;
 
 const image = images[`/src/assets/models/${model}.svg`];
-console.log(images, image);
 
 const headerProps = {
   style: { viewTransitionName: slugifyStr(title) },

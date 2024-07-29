@@ -5,7 +5,7 @@ draft: false
 description: A generator for the base plate of the HSW system
 model: honeycomb
 tags:
-  - Storage
+  - Household
 ---
 
 This model was the original model that lead to the more complex [HSW web

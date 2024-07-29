@@ -25,6 +25,7 @@ const {
   modDatetime,
   tags,
   model,
+  endImage,
 } = post.data;
 
 const { Content } = await post.render();
@@ -75,6 +76,18 @@ const layoutProps = {
     <article id="article" role="article" class="prose mx-auto mt-8 max-w-3xl">
       <Content />
       {model && <Model origin={Astro.url.origin} model={model} />}
+      {
+        endImage && (
+          <>
+            <br />
+            <img
+              src={endImage}
+              alt="Showing off the model"
+              class="my-8 h-auto w-full"
+            />
+          </>
+        )
+      }
     </article>
 
     <ul class="my-8">

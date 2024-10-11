@@ -1,13 +1,14 @@
 /** @typedef { typeof import("replicad") } replicadLib */
 
 /** @type {replicadLib} */
-const { draw } = replicad;
+const { draw, drawRoundedRectangle, drawCircle } = replicad;
 
 export const defaultParams = {
   width: 30,
   depth: 10,
   gutterDepth: 2,
   gutterWidth: 2,
+  withTestLock: false,
 };
 
 const MED_SEG = Math.sqrt(3) / 2;
@@ -50,7 +51,62 @@ const fuseAll = tiles => {
   return result;
 };
 
-export default function main({ width, gutterWidth, gutterDepth, depth }) {
+function lockShape() {
+  const innerRadius = 2;
+  const bottomWallThickness = 2;
+  const slitWidth = 13;
+  const slitDepth = 2;
+  const indentationDepth = 0.4;
+
+  const lock = draw()
+    .hLine(-innerRadius)
+    .vLine(bottomWallThickness)
+    .hLine(-5)
+    .vLine(0.6)
+    .line(4.4, 4.4)
+    .hLineTo(0)
+    .close();
+  const keyHole = drawRoundedRectangle(slitWidth, slitDepth)
+    .sketchOnPlane()
+    .extrude(3);
+  const indentation = drawRoundedRectangle(slitDepth, slitWidth)
+    .sketchOnPlane("XY", bottomWallThickness - indentationDepth)
+    .extrude(indentationDepth);
+  return keyHole.fuse(lock.sketchOnPlane("YZ").revolve().fuse(indentation));
+}
+
+function key() {
+  const head = draw()
+    .hLine(-1.5)
+    .vLine(4)
+    .hLine(-5)
+    .line(3, 3)
+    .hLineTo(0)
+    .closeWithMirror();
+
+  const body = draw()
+    .hLine(-25)
+    .customCorner(5)
+    .vLine(-25)
+    .customCorner(15)
+    .hLineTo(0)
+    .closeWithMirror();
+
+  return head
+    .fuse(body)
+    .cut(body.offset(-3))
+    .sketchOnPlane()
+    .extrude(1.8)
+    .chamfer(0.5);
+}
+
+export default function main({
+  width,
+  gutterWidth,
+  gutterDepth,
+  depth,
+  withTestLock,
+}) {
   const p = (std, med) => std + med * MED_SEG;
 
   const tile = specterTile();
@@ -78,10 +134,38 @@ export default function main({ width, gutterWidth, gutterDepth, depth }) {
     [0, 0]
   );
 
-  return outerBorder
+  const testLock = drawCircle(10)
     .sketchOnPlane()
-    .extrude(depth)
-    .cut(
-      innerTiles.sketchOnPlane("XY", depth - gutterDepth).extrude(gutterDepth)
-    );
+    .extrude(depth - gutterDepth)
+    .chamfer(0.5)
+    .cut(lockShape());
+
+  const returnValue = [
+    {
+      shape: outerBorder
+        .sketchOnPlane()
+        .extrude(depth)
+        .cut(
+          innerTiles
+            .sketchOnPlane("XY", depth - gutterDepth)
+            .extrude(gutterDepth)
+        )
+        .cut(lockShape().translate([width / 2, 0, 0]))
+        .cut(lockShape().translate([0, width, 0])),
+      name: "Spectre Stamp",
+    },
+    {
+      shape: key(),
+      name: "Removal Key",
+    },
+  ];
+
+  if (withTestLock) {
+    returnValue.push({
+      shape: testLock,
+      name: "Test Lock",
+    });
+  }
+
+  return returnValue;
 }

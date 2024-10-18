@@ -129,10 +129,9 @@ export default function main({
     tiles.map(t => t.offset(-gutterWidth / 2 / scaleFactor))
   ).scale(scaleFactor, [0, 0]);
 
-  const outerBorder = fuseAll(tiles.map(t => t.offset(1e-5))).scale(
-    scaleFactor,
-    [0, 0]
-  );
+  const outerBorder = fuseAll(tiles.map(t => t.offset(1e-5)))
+    .scale(scaleFactor, [0, 0])
+    .offset(-0.1);
 
   const testLock = drawCircle(10)
     .sketchOnPlane()

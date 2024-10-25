@@ -9,6 +9,10 @@ export const defaultParams = {
   gutterDepth: 2,
   gutterWidth: 2,
   withTestLock: false,
+
+  bulge: 0.2,
+  straightEdges: true,
+  //doubleBulge: false,
 };
 
 const MED_SEG = Math.sqrt(3) / 2;
@@ -32,11 +36,31 @@ const SPECTER_SHAPE = [
   [-1, 0],
 ];
 
-const specterTile = () => {
+const singleBulgeSpecterTile = (bulge = 0.2) => {
   const tilePen = draw(SPECTER_FIRST_POINT_POS);
 
   SPECTER_SHAPE.forEach(([x, y], i) => {
-    //tilePen.bulgeArc(x, y, 0.2 * (i % 2 === 0 ? 1 : -1));
+    tilePen.bulgeArc(x, y, bulge * (i % 2 === 0 ? 1 : -1));
+  });
+
+  return tilePen.close();
+};
+
+const doubleBulgeSpecterTile = (bulge = 0.2) => {
+  const tilePen = draw(SPECTER_FIRST_POINT_POS);
+
+  SPECTER_SHAPE.forEach(([x, y]) => {
+    tilePen.bulgeArc(x / 2, y / 2, bulge);
+    tilePen.bulgeArc(x / 2, y / 2, -bulge);
+  });
+
+  return tilePen.close();
+};
+
+const basicSpecterTile = () => {
+  const tilePen = draw(SPECTER_FIRST_POINT_POS);
+
+  SPECTER_SHAPE.forEach(([x, y], i) => {
     tilePen.line(x, y);
   });
 
@@ -105,15 +129,17 @@ export default function main({
   gutterWidth,
   gutterDepth,
   depth,
+  straightEdges,
+  // This should be removed and let as an option. As of now, this does does not
+  // work as expected (i.e. the order of the bulges is not correct, it should
+  // be merged at the drawing level)
+  doubleBulge = true,
+  bulge,
   withTestLock,
 }) {
   const p = (std, med) => std + med * MED_SEG;
 
-  const tile = specterTile();
-
-  const scaleFactor = width / tile.boundingBox.width;
-
-  const tiles = [
+  const makeMetaTile = tile => [
     tile,
     tile.rotate(30, [0, 0]).translate([p(-1.5, 1), p(-1.5, -1)]),
     tile.rotate(-90, [0, 0]).translate([p(1.5, 1), p(-1.5, 1)]),
@@ -125,32 +151,66 @@ export default function main({
     tile.rotate(90, [0, 0]).translate([p(-3, 2), p(3, 2)]),
   ];
 
-  const innerTiles = fuseAll(
-    tiles.map(t => t.offset(-gutterWidth / 2 / scaleFactor))
-  ).scale(scaleFactor, [0, 0]);
+  const tile = basicSpecterTile();
+  const scaleFactor = width / tile.boundingBox.width;
 
-  const outerBorder = fuseAll(tiles.map(t => t.offset(1e-5)))
+  const innerTile = straightEdges
+    ? tile
+    : doubleBulge
+      ? doubleBulgeSpecterTile(bulge)
+      : singleBulgeSpecterTile(bulge);
+
+  const innerTiles = fuseAll(
+    makeMetaTile(innerTile).map(t => {
+      const bottom = t
+        .offset(-gutterWidth / 2 / scaleFactor)
+        .scale(scaleFactor, [0, 0]);
+      const top = t.offset(-0.15 / scaleFactor).scale(scaleFactor, [0, 0]);
+
+      return bottom
+        .sketchOnPlane("XY", depth - gutterDepth)
+        .loftWith(top.sketchOnPlane("XY", depth));
+    })
+  );
+
+  let outerBorder = fuseAll(makeMetaTile(tile).map(t => t.offset(1e-5)))
     .scale(scaleFactor, [0, 0])
     .offset(-0.1);
 
-  const testLock = drawCircle(10)
-    .sketchOnPlane()
-    .extrude(depth - gutterDepth)
-    .chamfer(0.5)
-    .cut(lockShape());
+  if (!straightEdges) {
+    const outerBorderPoints = outerBorder.blueprint.curves.map(
+      c => c.firstPoint
+    );
+
+    let lastPoint = outerBorderPoints.at(-1);
+
+    const d = draw(lastPoint);
+    outerBorderPoints.forEach((p, i) => {
+      if (doubleBulge) {
+        const half = [(lastPoint[0] + p[0]) / 2, (lastPoint[1] + p[1]) / 2];
+        d.bulgeArcTo(half, bulge);
+        d.bulgeArcTo(p, -bulge);
+        lastPoint = p;
+      } else {
+        d.bulgeArcTo(p, bulge * (i % 2 === 0 ? -1 : 1));
+      }
+    });
+
+    outerBorder = d.close();
+  }
 
   const returnValue = [
     {
       shape: outerBorder
         .sketchOnPlane()
         .extrude(depth)
-        .cut(
-          innerTiles
-            .sketchOnPlane("XY", depth - gutterDepth)
-            .extrude(gutterDepth)
-        )
-        .cut(lockShape().translate([width / 2, 0, 0]))
-        .cut(lockShape().translate([0, width, 0])),
+        .cut(innerTiles, { optimization: "commonFace" })
+        .cut(lockShape().translate([width / 2, 0, 0]), {
+          optimization: "commonFace",
+        })
+        .cut(lockShape().translate([0, width, 0]), {
+          optimization: "commonFace",
+        }),
       name: "Spectre Stamp",
     },
     {
@@ -160,6 +220,12 @@ export default function main({
   ];
 
   if (withTestLock) {
+    const testLock = drawCircle(10)
+      .sketchOnPlane()
+      .extrude(depth - gutterDepth)
+      .chamfer(0.5)
+      .cut(lockShape());
+
     returnValue.push({
       shape: testLock,
       name: "Test Lock",

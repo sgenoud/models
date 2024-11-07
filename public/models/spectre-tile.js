@@ -1,7 +1,23 @@
 /** @typedef { typeof import("replicad") } replicadLib */
+/** @typedef { typeof import("pantograph2d") } pantographLib */
 
-/** @type {replicadLib} */
-const { draw, drawRoundedRectangle, drawCircle } = replicad;
+import {
+  pantograph,
+  sketchOnPlane,
+  initStudioIntegration,
+} from "https://cdn.jsdelivr.net/npm/replicad-pantograph/dist/studio/replicad-pantograph.js";
+const { draw, offset, cut, fuse } = pantograph;
+
+initStudioIntegration();
+
+function drawRect(width, height) {
+  return draw([Math.min(0, -(width / 2)), -height / 2])
+    .hLine(width)
+    .vLine(height)
+    .hLine(-width)
+    .vLine(-height)
+    .close();
+}
 
 export const defaultParams = {
   width: 30,
@@ -12,7 +28,7 @@ export const defaultParams = {
 
   bulge: 0.2,
   straightEdges: true,
-  //doubleBulge: false,
+  doubleBulge: false,
 };
 
 const MED_SEG = Math.sqrt(3) / 2;
@@ -67,6 +83,20 @@ const basicSpecterTile = () => {
   return tilePen.close();
 };
 
+const p = (std, med) => std + med * MED_SEG;
+const makeMetaTile = (tile, scaleFactor) =>
+  [
+    tile,
+    tile.rotate(30, [0, 0]).translateTo([p(-1.5, 1), p(-1.5, -1)]),
+    tile.rotate(-90, [0, 0]).translateTo([p(1.5, 1), p(-1.5, 1)]),
+    tile.rotate(150, [0, 0]).translateTo([p(-1.5, -1), p(1.5, -1)]),
+    tile.rotate(90, [0, 0]).translateTo([p(-1.5, 1), p(1.5, 1)]),
+    tile.rotate(-30, [0, 0]).translateTo([p(0, 2), p(0, 2)]),
+    tile.rotate(-30, [0, 0]).translateTo([p(1.5, 3), p(-1.5, 3)]),
+    tile.rotate(30, [0, 0]).translateTo([p(-1.5, 3), p(1.5, 3)]),
+    tile.rotate(90, [0, 0]).translateTo([p(-3, 2), p(3, 2)]),
+  ].map(t => t.scale(scaleFactor, [0, 0]));
+
 const fuseAll = tiles => {
   let result = tiles[0];
   for (let i = 1; i < tiles.length; i++) {
@@ -90,13 +120,13 @@ function lockShape() {
     .line(4.4, 4.4)
     .hLineTo(0)
     .close();
-  const keyHole = drawRoundedRectangle(slitWidth, slitDepth)
-    .sketchOnPlane()
-    .extrude(3);
-  const indentation = drawRoundedRectangle(slitDepth, slitWidth)
-    .sketchOnPlane("XY", bottomWallThickness - indentationDepth)
-    .extrude(indentationDepth);
-  return keyHole.fuse(lock.sketchOnPlane("YZ").revolve().fuse(indentation));
+  const keyHole = sketchOnPlane(drawRect(slitWidth, slitDepth)).extrude(3);
+  const indentation = sketchOnPlane(
+    drawRect(slitDepth, slitWidth),
+    "XY",
+    bottomWallThickness - indentationDepth
+  ).extrude(indentationDepth);
+  return keyHole.fuse(sketchOnPlane(lock, "YZ").revolve().fuse(indentation));
 }
 
 function key() {
@@ -116,12 +146,9 @@ function key() {
     .hLineTo(0)
     .closeWithMirror();
 
-  return head
-    .fuse(body)
-    .cut(body.offset(-3))
-    .sketchOnPlane()
-    .extrude(1.8)
-    .chamfer(0.5);
+  const keySketch = cut(fuse(head, body), offset(body, -3));
+
+  return sketchOnPlane(keySketch).extrude(1.8).chamfer(0.5);
 }
 
 export default function main({
@@ -130,79 +157,36 @@ export default function main({
   gutterDepth,
   depth,
   straightEdges,
-  // This should be removed and let as an option. As of now, this does does not
-  // work as expected (i.e. the order of the bulges is not correct, it should
-  // be merged at the drawing level)
-  doubleBulge = true,
+  doubleBulge,
   bulge,
   withTestLock,
 }) {
-  const p = (std, med) => std + med * MED_SEG;
-
-  const makeMetaTile = tile => [
-    tile,
-    tile.rotate(30, [0, 0]).translate([p(-1.5, 1), p(-1.5, -1)]),
-    tile.rotate(-90, [0, 0]).translate([p(1.5, 1), p(-1.5, 1)]),
-    tile.rotate(150, [0, 0]).translate([p(-1.5, -1), p(1.5, -1)]),
-    tile.rotate(90, [0, 0]).translate([p(-1.5, 1), p(1.5, 1)]),
-    tile.rotate(-30, [0, 0]).translate([p(0, 2), p(0, 2)]),
-    tile.rotate(-30, [0, 0]).translate([p(1.5, 3), p(-1.5, 3)]),
-    tile.rotate(30, [0, 0]).translate([p(-1.5, 3), p(1.5, 3)]),
-    tile.rotate(90, [0, 0]).translate([p(-3, 2), p(3, 2)]),
-  ];
-
-  const tile = basicSpecterTile();
-  const scaleFactor = width / tile.boundingBox.width;
-
-  const innerTile = straightEdges
-    ? tile
+  const tile = straightEdges
+    ? basicSpecterTile()
     : doubleBulge
       ? doubleBulgeSpecterTile(bulge)
       : singleBulgeSpecterTile(bulge);
 
-  const innerTiles = fuseAll(
-    makeMetaTile(innerTile).map(t => {
-      const bottom = t
-        .offset(-gutterWidth / 2 / scaleFactor)
-        .scale(scaleFactor, [0, 0]);
-      const top = t.offset(-0.15 / scaleFactor).scale(scaleFactor, [0, 0]);
+  const scaleFactor = width / tile.boundingBox.width;
 
-      return bottom
-        .sketchOnPlane("XY", depth - gutterDepth)
-        .loftWith(top.sketchOnPlane("XY", depth));
+  const tiles = makeMetaTile(tile, scaleFactor);
+
+  const innerTiles = fuseAll(
+    tiles.map(t => {
+      const bottom = offset(t, -gutterWidth / 2);
+      const top = offset(t, -0.15);
+
+      return sketchOnPlane(bottom, "XY", depth - gutterDepth).loftWith(
+        sketchOnPlane(top, "XY", depth)
+      );
     })
   );
 
-  let outerBorder = fuseAll(makeMetaTile(tile).map(t => t.offset(1e-5)))
-    .scale(scaleFactor, [0, 0])
-    .offset(-0.1);
-
-  if (!straightEdges) {
-    const outerBorderPoints = outerBorder.blueprint.curves.map(
-      c => c.firstPoint
-    );
-
-    let lastPoint = outerBorderPoints.at(-1);
-
-    const d = draw(lastPoint);
-    outerBorderPoints.forEach((p, i) => {
-      if (doubleBulge) {
-        const half = [(lastPoint[0] + p[0]) / 2, (lastPoint[1] + p[1]) / 2];
-        d.bulgeArcTo(half, bulge);
-        d.bulgeArcTo(p, -bulge);
-        lastPoint = p;
-      } else {
-        d.bulgeArcTo(p, bulge * (i % 2 === 0 ? -1 : 1));
-      }
-    });
-
-    outerBorder = d.close();
-  }
+  let outerBorder = offset(fuseAll(tiles), -0.1);
 
   const returnValue = [
     {
-      shape: outerBorder
-        .sketchOnPlane()
+      shape: sketchOnPlane(outerBorder)
         .extrude(depth)
         .cut(innerTiles, { optimization: "commonFace" })
         .cut(lockShape().translate([width / 2, 0, 0]), {

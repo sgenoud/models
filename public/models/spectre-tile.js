@@ -1,23 +1,16 @@
 /** @typedef { typeof import("replicad") } replicadLib */
-/** @typedef { typeof import("pantograph2d") } pantographLib */
 
 import {
   pantograph,
+  drawShape,
   sketchOnPlane,
   initStudioIntegration,
-} from "https://cdn.jsdelivr.net/npm/replicad-pantograph/dist/studio/replicad-pantograph.js";
+} from "https://cdn.jsdelivr.net/npm/replicad-pantograph@0.7.1/dist/studio/replicad-pantograph.js";
+
 const { draw, offset, cut, fuse } = pantograph;
+const { drawRect } = drawShape;
 
 initStudioIntegration();
-
-function drawRect(width, height) {
-  return draw([Math.min(0, -(width / 2)), -height / 2])
-    .hLine(width)
-    .vLine(height)
-    .hLine(-width)
-    .vLine(-height)
-    .close();
-}
 
 export const defaultParams = {
   width: 30,

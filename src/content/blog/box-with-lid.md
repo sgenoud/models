@@ -1,6 +1,7 @@
 ---
 pubDatetime: 2023-07-23T12:00:00Z
 title: Box with lid
+featured: true
 draft: false
 description: To store your small items
 model: box-with-lid

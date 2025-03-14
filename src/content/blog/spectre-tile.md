@@ -3,6 +3,7 @@ slug: spectre-monotile
 pubDatetime: 2024-11-08T12:00:00Z
 title: Spectre monotile stamp
 draft: false
+featured: true
 description: A stamp to apply a spectre monotile pattern to ceramics
 model: spectre-tile
 tags:

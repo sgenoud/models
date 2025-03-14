@@ -3,6 +3,7 @@ slug: a-strainer
 pubDatetime: 2023-08-15T12:00:00Z
 title: A strainer for your sink
 draft: false
+featured: true
 description: I needed one for my chalet, so here it is
 model: strainer
 tags:

@@ -14,8 +14,8 @@ const sideShape = (startPoint, endPoint, height) => {
   const shape = draw([0, height])
     .hLine(-startPoint)
     .vLine(-1.4)
-    .customCorner(0.4)
-    .smoothSplineTo([-endPoint, 0], { endTangent: -90, startTangent: 0 })
+    //    .customCorner(0.4)
+ .smoothSplineTo([-endPoint, 0], { endTangent: -90, startTangent: 0 })
     .hLine(endPoint)
     .closeWithMirror();
 
@@ -71,31 +71,31 @@ function tray({
     .fuse(right)
     .translateZ(bottomThickness)
     .fuse(bottom)
-    .fillet(fillet, (e) =>
+    .fillet(fillet, e =>
       e
         .inDirection("Z")
         .either([
-          (e) => e.inPlane("XZ", width / 2 + wallThickness),
-          (e) => e.inPlane("XZ", -width / 2 - wallThickness),
+          e => e.inPlane("XZ", width / 2 + wallThickness),
+          e => e.inPlane("XZ", -width / 2 - wallThickness),
         ])
         .either([
-          (e) => e.inPlane("YZ", height / 2 + wallThickness),
-          (e) => e.inPlane("YZ", -height / 2 - wallThickness),
+          e => e.inPlane("YZ", height / 2 + wallThickness),
+          e => e.inPlane("YZ", -height / 2 - wallThickness),
         ])
     );
 
   const innerFillet = fillet - wallThickness;
   if (innerFillet > 0) {
-    tray = tray.fillet(innerFillet, (e) =>
+    tray = tray.fillet(innerFillet, e =>
       e
         .inDirection("Z")
         .either([
-          (e) => e.inPlane("XZ", width / 2),
-          (e) => e.inPlane("XZ", -width / 2),
+          e => e.inPlane("XZ", width / 2),
+          e => e.inPlane("XZ", -width / 2),
         ])
         .either([
-          (e) => e.inPlane("YZ", height / 2),
-          (e) => e.inPlane("YZ", -height / 2),
+          e => e.inPlane("YZ", height / 2),
+          e => e.inPlane("YZ", -height / 2),
         ])
     );
   }
@@ -184,13 +184,13 @@ function lid({
   }
   lid = lid
     .translateZ(wallThickness)
-    .fuse(top.fillet(fillet, (e) => e.inDirection("Z")))
-    .fillet(1, (e) =>
+    .fuse(top.fillet(fillet, e => e.inDirection("Z")))
+    .fillet(1, e =>
       e.either([
-        (e) => e.containsPoint([height / 2, 0, wallThickness]),
-        (e) => e.containsPoint([-height / 2, 0, wallThickness]),
-        (e) => e.containsPoint([0, width / 2, wallThickness]),
-        (e) => e.containsPoint([0, -width / 2, wallThickness]),
+        e => e.containsPoint([height / 2, 0, wallThickness]),
+        e => e.containsPoint([-height / 2, 0, wallThickness]),
+        e => e.containsPoint([0, width / 2, wallThickness]),
+        e => e.containsPoint([0, -width / 2, wallThickness]),
       ])
     );
 

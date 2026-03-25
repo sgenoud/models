@@ -1,4 +1,3 @@
 #!/usr/bin/env fish
 
-replicad -V
-replicad --project $argv[1] ./src/assets/models/$(basename $argv[1])
+replicad --projection $argv[1] ./src/assets/models/$(basename $argv[1])

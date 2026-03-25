@@ -15,7 +15,7 @@ const sideShape = (startPoint, endPoint, height) => {
     .hLine(-startPoint)
     .vLine(-1.4)
     //    .customCorner(0.4)
- .smoothSplineTo([-endPoint, 0], { endTangent: -90, startTangent: 0 })
+    .smoothSplineTo([-endPoint, 0], { endTangent: -90, startTangent: 0 })
     .hLine(endPoint)
     .closeWithMirror();
 

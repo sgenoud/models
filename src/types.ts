@@ -3,6 +3,7 @@ export type SocialObjects = {
   href: string;
   active: boolean;
   isMe?: boolean;
+  handle?: string;
   linkTitle: string;
 }[];
 

@@ -29,6 +29,7 @@ export const SOCIALS: SocialObjects = [
     href: "https://toot.cafe/@stevegenoud",
     linkTitle: `Contact me on Mastodon`,
     isMe: true,
+    handle: "@stevegenoud@toot.cafe",
     active: true,
   },
   {

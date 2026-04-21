@@ -1,5 +1,5 @@
 ---
-import { SITE } from "@config";
+import { SITE, SOCIALS } from "@config";
 import "../styles/base.css";
 
 import { ViewTransitions } from "astro:transitions";
@@ -30,9 +30,12 @@ const socialImageURL = new URL(
   ogImage ? ogImage : SITE.ogImage,
   Astro.url.origin
 ).href;
+
+const mastodonConfig = SOCIALS.find(s => s.name === "Mastodon");
+const mastodonHandle = mastodonConfig?.handle;
 ---
 
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
@@ -46,6 +49,11 @@ const socialImageURL = new URL(
     <meta name="title" content={title} />
     <meta name="description" content={description} />
     <meta name="author" content={author} />
+    {
+      mastodonHandle && (
+        <meta name="fediverse:creator" content={mastodonHandle} />
+      )
+    }
     <link rel="sitemap" href="/sitemap-index.xml" />
 
     <!-- Open Graph / Facebook -->

@@ -4,7 +4,7 @@ title: An observation window for a pinhole camera
 draft: false
 description: To project an eclipse onto a screen with a pinhole camera
 model: pinhole-camera-observation
-endImage: /src/assets/images/pinhole-camera.jpeg
+endImage: ../../assets/images/pinhole-camera.jpeg
 ---
 
 I didn't plan ahead to buy eclipse glasses, and by the time I looked, there

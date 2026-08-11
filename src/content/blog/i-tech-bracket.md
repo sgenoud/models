@@ -4,7 +4,7 @@ title: A fixture for a square USB hub
 draft: false
 description: This fixuture is designed to be 3D printed without supports.
 model: i-tech-bracket
-endImage: /src/assets/images/i-tech-bracket.jpeg
+endImage: ../../assets/images/i-tech-bracket.jpeg
 tags:
   - Household
 ---

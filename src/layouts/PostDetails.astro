@@ -8,6 +8,7 @@ import type { CollectionEntry } from "astro:content";
 import { slugifyStr } from "@utils/slugify";
 import Model from "@components/Model";
 import { SITE } from "@config";
+import { Image } from "astro:assets";
 
 export interface Props {
   post: CollectionEntry<"blog">;
@@ -80,7 +81,7 @@ const layoutProps = {
         endImage && (
           <>
             <br />
-            <img
+            <Image
               src={endImage}
               alt="Showing off the model"
               class="my-8 h-auto w-full"

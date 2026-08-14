@@ -22,7 +22,7 @@
     src: url("/fonts/HKGrotesk-Bold.woff2") format("woff2");
    }
 
-  :root, {
+  :root {
     --color-fill: 251, 254, 251;
     --color-text-base: 40, 39, 40;
     --color-accent: 0, 108, 172;
